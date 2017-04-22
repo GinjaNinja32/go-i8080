@@ -102,9 +102,8 @@ var n int = 0
 
 func (c *CPU) Step() (cycles int) {
 	op := c.Memory[c.PC]
-	opFunc := c.dispatch(op)
 	c.PC++
-	cycles = opFunc(op, c)
+	cycles = ops[op](op, c)
 
 	if c.PC == 0x0005 { // calling BDOS
 		switch c.Registers[C] {
