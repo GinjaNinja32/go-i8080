@@ -9,7 +9,7 @@ package i8080
 */
 
 // STAX: 0x02, 0x12
-func i_stax(op uint8, c *CPU) int {
+func i_stax(op uint8, c *CPU) uint64 {
 	dst := insArg2(op) // actually 1 bit, but the 2nd bit of insArg2 is always 0 in the two STAX instructions
 
 	if dst == 0 { // STAX B
@@ -22,13 +22,13 @@ func i_stax(op uint8, c *CPU) int {
 }
 
 // STA: 0x32
-func i_sta(op uint8, c *CPU) int {
+func i_sta(op uint8, c *CPU) uint64 {
 	c.Memory[insArg16(c)] = c.Registers[A]
 	return 13
 }
 
 // LDAX: 0x0A, 0x1A
-func i_ldax(op uint8, c *CPU) int {
+func i_ldax(op uint8, c *CPU) uint64 {
 	dst := insArg2(op) // actually 1 bit, but the 2nd bit of insArg2 is always 0 in the two LDAX instructions
 
 	if dst == 0 { // LDAX B
@@ -41,13 +41,13 @@ func i_ldax(op uint8, c *CPU) int {
 }
 
 // LDA: 0x3A
-func i_lda(op uint8, c *CPU) int {
+func i_lda(op uint8, c *CPU) uint64 {
 	c.Registers[A] = c.Memory[insArg16(c)]
 	return 13
 }
 
 // MVI: 0x06, 0x0E, 0x16, 0x1E, 0x26, 0x2E, 0x36, 0x3E
-func i_mvi(op uint8, c *CPU) int {
+func i_mvi(op uint8, c *CPU) uint64 {
 	dst := insArg3b(op)
 
 	insSetreg8(c, dst, insArg8(c))
@@ -60,7 +60,7 @@ func i_mvi(op uint8, c *CPU) int {
 }
 
 // MOV: 0x40 to 0x75, 0x77 to 0x7f
-func i_mov(op uint8, c *CPU) int {
+func i_mov(op uint8, c *CPU) uint64 {
 	src := insArg3(op)
 	dst := insArg3b(op)
 

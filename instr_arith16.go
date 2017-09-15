@@ -7,7 +7,7 @@ package i8080
 */
 
 // INX: 0x03, 0x13, 0x23, 0x33
-func i_inx(op uint8, c *CPU) int {
+func i_inx(op uint8, c *CPU) uint64 {
 	reg := insArg2(op)
 
 	switch reg {
@@ -21,7 +21,7 @@ func i_inx(op uint8, c *CPU) int {
 }
 
 // DAD: 0x09, 0x19, 0x29, 0x39
-func i_dad(op uint8, c *CPU) int {
+func i_dad(op uint8, c *CPU) uint64 {
 	reg := insArg2(op)
 
 	a := c.HL()
@@ -46,7 +46,7 @@ func i_dad(op uint8, c *CPU) int {
 }
 
 // DCX: 0x0B, 0x1B, 0x2B, 0x3B
-func i_dcx(op uint8, c *CPU) int {
+func i_dcx(op uint8, c *CPU) uint64 {
 	reg := insArg2(op)
 
 	switch reg {
