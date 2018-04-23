@@ -14,7 +14,7 @@ func insArg3b(op uint8) uint8 {
 
 func insArg8(c *CPU) (ret uint8) {
 	ret = c.Memory[c.PC]
-	c.PC += 1
+	c.PC++
 	return
 }
 
@@ -43,20 +43,20 @@ func insSetreg8(c *CPU, reg uint8, val uint8) {
 }
 
 var ops = [256]func(uint8, *CPU) uint64{
-	i_nop, i_lxi, i_stax, i_inx, i_inr, i_dcr, i_mvi, i_rlc, i_nop, i_dad, i_ldax, i_dcx, i_inr, i_dcr, i_mvi, i_rrc,
-	i_nop, i_lxi, i_stax, i_inx, i_inr, i_dcr, i_mvi, i_ral, i_nop, i_dad, i_ldax, i_dcx, i_inr, i_dcr, i_mvi, i_rar,
-	i_nop, i_lxi, i_shld, i_inx, i_inr, i_dcr, i_mvi, i_daa, i_nop, i_dad, i_lhld, i_dcx, i_inr, i_dcr, i_mvi, i_cma,
-	i_nop, i_lxi, i_sta, i_inx, i_inr, i_dcr, i_mvi, i_stc, i_nop, i_dad, i_lda, i_dcx, i_inr, i_dcr, i_mvi, i_cmc,
-	i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov,
-	i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov,
-	i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov,
-	i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_hlt, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov, i_mov,
-	i_add, i_add, i_add, i_add, i_add, i_add, i_add, i_add, i_adc, i_adc, i_adc, i_adc, i_adc, i_adc, i_adc, i_adc,
-	i_sub, i_sub, i_sub, i_sub, i_sub, i_sub, i_sub, i_sub, i_sbb, i_sbb, i_sbb, i_sbb, i_sbb, i_sbb, i_sbb, i_sbb,
-	i_ana, i_ana, i_ana, i_ana, i_ana, i_ana, i_ana, i_ana, i_xra, i_xra, i_xra, i_xra, i_xra, i_xra, i_xra, i_xra,
-	i_ora, i_ora, i_ora, i_ora, i_ora, i_ora, i_ora, i_ora, i_cmp, i_cmp, i_cmp, i_cmp, i_cmp, i_cmp, i_cmp, i_cmp,
-	i_cond_ret, i_pop, i_cond_jmp, i_jmp, i_cond_call, i_push, i_adi, i_rst, i_cond_ret, i_ret, i_cond_jmp, i_jmp, i_cond_call, i_call, i_aci, i_rst,
-	i_cond_ret, i_pop, i_cond_jmp, i_out, i_cond_call, i_push, i_sui, i_rst, i_cond_ret, i_ret, i_cond_jmp, i_in, i_cond_call, i_bdos, i_sbi, i_rst,
-	i_cond_ret, i_pop, i_cond_jmp, i_xthl, i_cond_call, i_push, i_ani, i_rst, i_cond_ret, i_pchl, i_cond_jmp, i_xchg, i_cond_call, i_call, i_xri, i_rst,
-	i_cond_ret, i_pop, i_cond_jmp, i_di, i_cond_call, i_push, i_ori, i_rst, i_cond_ret, i_sphl, i_cond_jmp, i_ei, i_cond_call, i_call, i_cpi, i_rst,
+	instrNOP, instrLXI, instrSTAX, instrINX, instrINR, instrDCR, instrMVI, instrRLC, instrNOP, instrDAD, instrLDAX, instrDCX, instrINR, instrDCR, instrMVI, instrRRC,
+	instrNOP, instrLXI, instrSTAX, instrINX, instrINR, instrDCR, instrMVI, instrRAL, instrNOP, instrDAD, instrLDAX, instrDCX, instrINR, instrDCR, instrMVI, instrRAR,
+	instrNOP, instrLXI, instrSHLD, instrINX, instrINR, instrDCR, instrMVI, instrDAA, instrNOP, instrDAD, instrLHLD, instrDCX, instrINR, instrDCR, instrMVI, instrCMA,
+	instrNOP, instrLXI, instrSTA, instrINX, instrINR, instrDCR, instrMVI, instrSTC, instrNOP, instrDAD, instrLDA, instrDCX, instrINR, instrDCR, instrMVI, instrCMC,
+	instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV,
+	instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV,
+	instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV,
+	instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrHLT, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV, instrMOV,
+	instrADD, instrADD, instrADD, instrADD, instrADD, instrADD, instrADD, instrADD, instrADC, instrADC, instrADC, instrADC, instrADC, instrADC, instrADC, instrADC,
+	instrSUB, instrSUB, instrSUB, instrSUB, instrSUB, instrSUB, instrSUB, instrSUB, instrSBB, instrSBB, instrSBB, instrSBB, instrSBB, instrSBB, instrSBB, instrSBB,
+	instrANA, instrANA, instrANA, instrANA, instrANA, instrANA, instrANA, instrANA, instrXRA, instrXRA, instrXRA, instrXRA, instrXRA, instrXRA, instrXRA, instrXRA,
+	instrORA, instrORA, instrORA, instrORA, instrORA, instrORA, instrORA, instrORA, instrCMP, instrCMP, instrCMP, instrCMP, instrCMP, instrCMP, instrCMP, instrCMP,
+	instrCondRET, instrPOP, instrCondJMP, instrJMP, instrCondCALL, instrPUSH, instrADI, instrRST, instrCondRET, instrRET, instrCondJMP, instrJMP, instrCondCALL, instrCALL, instrACI, instrRST,
+	instrCondRET, instrPOP, instrCondJMP, instrOUT, instrCondCALL, instrPUSH, instrSUI, instrRST, instrCondRET, instrRET, instrCondJMP, instrIN, instrCondCALL, instrBDOS, instrSBI, instrRST,
+	instrCondRET, instrPOP, instrCondJMP, instrXTHL, instrCondCALL, instrPUSH, instrANI, instrRST, instrCondRET, instrPCHL, instrCondJMP, instrXCHG, instrCondCALL, instrCALL, instrXRI, instrRST,
+	instrCondRET, instrPOP, instrCondJMP, instrDI, instrCondCALL, instrPUSH, instrORI, instrRST, instrCondRET, instrSPHL, instrCondJMP, instrEI, instrCondCALL, instrCALL, instrCPI, instrRST,
 }

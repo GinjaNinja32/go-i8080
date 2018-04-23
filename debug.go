@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// Debug outputs a debug trace for the CPU
 func (c *CPU) Debug() string {
 	mnem, args := c.disasmPC()
 
@@ -26,38 +27,39 @@ func (c *CPU) Debug() string {
 
 	flags := fmt.Sprintf("FLAGS: %s", FlagsToString(uint8(c.Flags)))
 
-	return fmt.Sprintf("%s\n%s\n%s\n%s\n%s", regs, ptrs, flags, disasm)
+	return fmt.Sprintf("%s\n%s\n%s\n%s", regs, ptrs, flags, disasm)
 }
 
+// FlagsToString converts a flag register value `ff` to a string describing the state of the flags
 func FlagsToString(ff uint8) string {
 	f := flags(ff)
 	var Z, C, A, P, S string
 
-	if (f & F_ZERO) != 0 {
+	if (f & FlagZero) != 0 {
 		Z = "Z"
 	} else {
 		Z = "NZ"
 	}
 
-	if (f & F_CARRY) != 0 {
+	if (f & FlagCarry) != 0 {
 		C = "C"
 	} else {
 		C = "NC"
 	}
 
-	if (f & F_AUX_CARRY) != 0 {
+	if (f & FlagAuxCarry) != 0 {
 		A = "A"
 	} else {
 		A = "NA"
 	}
 
-	if (f & F_PARITY) != 0 {
+	if (f & FlagParity) != 0 {
 		P = "PE"
 	} else {
 		P = "PO"
 	}
 
-	if (f & F_SIGN) != 0 {
+	if (f & FlagSign) != 0 {
 		S = "M"
 	} else {
 		S = "P"

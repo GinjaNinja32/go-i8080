@@ -5,9 +5,13 @@ import (
 	"time"
 )
 
-const MHZ_2 = 500 * time.Nanosecond
-const MHZ_3_125 = 320 * time.Nanosecond
+// Inverse speed constants; Speed2MHz per instruction is a speed of 2MHz, etc
+const (
+	Speed2Mhz     = 500 * time.Nanosecond
+	Speed3_125Mhz = 320 * time.Nanosecond
+)
 
+// Register index constants
 const (
 	B uint8 = iota
 	C
@@ -19,6 +23,7 @@ const (
 	A
 )
 
+// CPU implements an emulated Intel 8080 CPU
 type CPU struct {
 	Memory    [65536]uint8
 	Registers [8]uint8
@@ -32,10 +37,11 @@ type CPU struct {
 	bdos
 }
 
+// New creates a new emulated Intel 8080 CPU
 func New() (c *CPU) {
 	c = &CPU{
-		Flags:     F_BIT1_1,
-		ClockTime: MHZ_2,
+		Flags:     FlagBit1,
+		ClockTime: Speed2Mhz,
 	}
 
 	c.initBDOS()
@@ -43,6 +49,7 @@ func New() (c *CPU) {
 	return
 }
 
+// Output is called when a string is output
 func (c *CPU) Output(s string) {
 	//c.OutputStr += s
 	fmt.Printf("%s", s)
@@ -50,6 +57,7 @@ func (c *CPU) Output(s string) {
 
 const tickBudget = 10 * time.Millisecond
 
+// Run runs the CPU and returns how many CPU cycles were executed before a halt
 func (c *CPU) Run() (cycles uint64) {
 	ticker := time.NewTicker(tickBudget)
 

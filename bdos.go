@@ -21,7 +21,7 @@ func (c *CPU) initBDOS() {
 	c.Memory[0x0006] = 0xC9 // RET
 }
 
-func i_bdos(op uint8, c *CPU) uint64 {
+func instrBDOS(op uint8, c *CPU) uint64 {
 	switch c.Registers[C] {
 	case 0: // TERMCPM
 		// TODO
