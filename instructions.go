@@ -56,7 +56,7 @@ var ops = [256]func(uint8, *CPU) uint64{
 	instrANA, instrANA, instrANA, instrANA, instrANA, instrANA, instrANA, instrANA, instrXRA, instrXRA, instrXRA, instrXRA, instrXRA, instrXRA, instrXRA, instrXRA,
 	instrORA, instrORA, instrORA, instrORA, instrORA, instrORA, instrORA, instrORA, instrCMP, instrCMP, instrCMP, instrCMP, instrCMP, instrCMP, instrCMP, instrCMP,
 	instrCondRET, instrPOP, instrCondJMP, instrJMP, instrCondCALL, instrPUSH, instrADI, instrRST, instrCondRET, instrRET, instrCondJMP, instrJMP, instrCondCALL, instrCALL, instrACI, instrRST,
-	instrCondRET, instrPOP, instrCondJMP, instrOUT, instrCondCALL, instrPUSH, instrSUI, instrRST, instrCondRET, instrRET, instrCondJMP, instrIN, instrCondCALL, instrBDOS, instrSBI, instrRST,
+	instrCondRET, instrPOP, instrCondJMP, instrOUT, instrCondCALL, instrPUSH, instrSUI, instrRST, instrCondRET, instrRET, instrCondJMP, instrIN, instrCondCALL, instrBIOS, instrSBI, instrRST,
 	instrCondRET, instrPOP, instrCondJMP, instrXTHL, instrCondCALL, instrPUSH, instrANI, instrRST, instrCondRET, instrPCHL, instrCondJMP, instrXCHG, instrCondCALL, instrCALL, instrXRI, instrRST,
 	instrCondRET, instrPOP, instrCondJMP, instrDI, instrCondCALL, instrPUSH, instrORI, instrRST, instrCondRET, instrSPHL, instrCondJMP, instrEI, instrCondCALL, instrCALL, instrCPI, instrRST,
 }

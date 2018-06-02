@@ -2,11 +2,13 @@ package i8080
 
 import (
 	"fmt"
+	"io"
 	"time"
 )
 
 // Inverse speed constants; Speed2MHz per instruction is a speed of 2MHz, etc
 const (
+	SpeedDebug    = 10 * time.Millisecond
 	Speed2Mhz     = 500 * time.Nanosecond
 	Speed3_125Mhz = 320 * time.Nanosecond
 )
@@ -34,17 +36,19 @@ type CPU struct {
 
 	ClockTime time.Duration // nanoseconds per clock tick
 
-	bdos
+	bios
+	conio
 }
 
 // New creates a new emulated Intel 8080 CPU
-func New() (c *CPU) {
+func New(conin io.Reader, conout io.Writer, disks [][]byte) (c *CPU) {
 	c = &CPU{
 		Flags:     FlagBit1,
 		ClockTime: Speed2Mhz,
 	}
 
-	c.initBDOS()
+	c.initBIOS(disks)
+	c.initIO(conin, conout)
 
 	return
 }
