@@ -41,6 +41,7 @@ type CPU struct {
 
 	bios
 	conio
+	diskio
 }
 
 // New creates a new emulated Intel 8080 CPU
@@ -51,7 +52,7 @@ func New(conin io.Reader, conout io.Writer, cpmImage []byte, disks []Disk) (c *C
 	}
 
 	c.initBIOS(cpmImage, disks)
-	c.initIO(conin, conout)
+	c.initConsole(conin, conout)
 
 	return
 }

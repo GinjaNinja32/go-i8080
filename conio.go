@@ -12,18 +12,18 @@ type conio struct {
 	out io.Writer
 }
 
-func (c *CPU) initIO(conin io.Reader, conout io.Writer) {
+func (c *CPU) initConsole(conin io.Reader, conout io.Writer) {
 	c.conio.in = conin
 	c.conio.out = conout
 	c.conio.inStream = make(chan byte, 100)
 	go c.processInput()
 }
 
-func (c *CPU) ioHasChar() bool {
+func (c *CPU) conHasChar() bool {
 	return len(c.conio.inStream) > 0
 }
 
-func (c *CPU) ioPutChar(char uint8) {
+func (c *CPU) conPutChar(char uint8) {
 	if char == 8 {
 		fmt.Printf("\033[1D") // \033[1D")
 		return
@@ -36,7 +36,7 @@ func (c *CPU) ioPutChar(char uint8) {
 	}
 }
 
-func (c *CPU) ioGetChar() uint8 {
+func (c *CPU) conGetChar() uint8 {
 	ch := <-c.conio.inStream
 	if ch == 0x7F {
 		// convert DEL to ^H
