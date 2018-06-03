@@ -1,12 +1,12 @@
 package i8080
 
 import (
-//"io"
+	"io"
 )
 
 // Disk constants
 const (
-	SECTORS_PER_DISK = 26
+	SECTORS_PER_TRACK = 26
 
 	DPH_SIZE   = 16
 	DPB_SIZE   = 16 // ?
@@ -28,7 +28,7 @@ const (
 
 	SecTrans = DPH + 4*DPH_SIZE
 
-	DPB = SecTrans + SECTORS_PER_DISK
+	DPB = SecTrans + SECTORS_PER_TRACK
 
 	DirBf = DPB + DPB_SIZE
 
@@ -57,7 +57,7 @@ type diskio struct {
 }
 
 type Disk struct {
-	Data     []byte
+	Data     io.ReadWriteSeeker
 	ReadOnly bool
 }
 
@@ -128,12 +128,24 @@ func (c *CPU) diskSector(sector uint16) {
 }
 
 func (c *CPU) diskRead() uint8 {
-	offset := 128 * int(26*c.diskio.track+c.diskio.sector)
+	offset := DMA_SIZE * int64(SECTORS_PER_TRACK*c.diskio.track+c.diskio.sector)
 
-	disk := c.diskio.disks[c.diskio.disk].Data[offset:][:128]
-	dma := c.Memory[c.diskio.dmaAddress:][:128]
+	disk := c.diskio.disks[c.diskio.disk].Data
+	dma := c.Memory[c.diskio.dmaAddress:][:DMA_SIZE]
 
-	copy(dma, disk)
+	_, err := disk.Seek(offset, io.SeekStart)
+	if err != nil {
+		panic(err)
+	}
+
+	n, err := disk.Read(dma)
+	if err != nil {
+		panic(err)
+	}
+	if n != DMA_SIZE {
+		panic(n)
+	}
+
 	return 0
 }
 
@@ -142,12 +154,24 @@ func (c *CPU) diskWrite() uint8 {
 		return 2
 	}
 
-	offset := 128 * int(26*c.diskio.track+c.diskio.sector)
+	disk := c.diskio.disks[c.diskio.disk].Data
+	dma := c.Memory[c.diskio.dmaAddress:][:DMA_SIZE]
 
-	disk := c.diskio.disks[c.diskio.disk].Data[offset:][:128]
-	dma := c.Memory[c.diskio.dmaAddress:][:128]
+	offset := DMA_SIZE * int64(SECTORS_PER_TRACK*c.diskio.track+c.diskio.sector)
 
-	copy(disk, dma)
+	_, err := disk.Seek(offset, io.SeekStart)
+	if err != nil {
+		panic(err)
+	}
+
+	n, err := disk.Write(dma)
+	if err != nil {
+		panic(err)
+	}
+	if n != DMA_SIZE {
+		panic(n)
+	}
+
 	return 0
 }
 
