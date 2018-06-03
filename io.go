@@ -1,6 +1,7 @@
 package i8080
 
 import (
+	"fmt"
 	"io"
 )
 
@@ -23,6 +24,10 @@ func (c *CPU) ioHasChar() bool {
 }
 
 func (c *CPU) ioPutChar(char uint8) {
+	if char == 8 {
+		fmt.Printf("\033[1D") // \033[1D")
+		return
+	}
 	n, err := c.conio.out.Write([]byte{char})
 	if err != nil {
 		panic(err)
@@ -32,7 +37,12 @@ func (c *CPU) ioPutChar(char uint8) {
 }
 
 func (c *CPU) ioGetChar() uint8 {
-	return <-c.conio.inStream
+	ch := <-c.conio.inStream
+	if ch == 0x7F {
+		// convert DEL to ^H
+		return 0x08
+	}
+	return ch
 }
 
 func (c *CPU) processInput() {

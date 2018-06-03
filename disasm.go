@@ -12,6 +12,11 @@ var disasmTable = [256]string{
 func (c *CPU) disasmPC() (string, string) {
 	op := c.Memory[c.PC]
 
+	if op == 0xDD {
+		// BIOS calls
+		return "BIOS", fmt.Sprintf("%d", int(c.PC)-WBOOT)
+	}
+
 	str := disasmTable[op]
 
 	str = strings.Replace(str, "d8", fmt.Sprintf("#%02x", c.Memory[c.PC+1]), -1)

@@ -92,26 +92,37 @@ type bios struct {
 	currentTrack  uint16
 	currentSector uint16
 
-	disks [][]byte
+	cpmImage []byte
+	disks    []Disk
 }
 
-func (c *CPU) InitBIOS() {
-	c.initBIOS(nil)
+type Disk struct {
+	Data     []byte
+	ReadOnly bool
 }
 
-func (c *CPU) initBIOS(disks [][]byte) {
+func (c *CPU) initBIOS(cpmImage []byte, disks []Disk) {
+	if cpmImage != nil {
+		c.bios.cpmImage = cpmImage
+	}
 	if disks != nil {
 		c.bios.disks = disks
 	}
+
+	copy(c.Memory[CPM:], c.bios.cpmImage)
+	c.PC = CPM
 
 	// Setup 0xDD hook to call BIOS
 	for i := BOOT; i <= SECTRAN; i += 3 {
 		c.Memory[i] = 0xDD
 	}
 
+	// not sure why this is needed, but it prevents CP/M trying to select weird disks
+	c.Registers[C] = 0
+
 	// Setup jump vectors for CP/M
 	c.Memory[0] = 0xC3 // JMP
-	c.Write16(1, BOOT)
+	c.Write16(1, WBOOT)
 
 	c.Memory[3] = 0x00
 	c.Memory[4] = 0x00
@@ -144,7 +155,7 @@ func (c *CPU) initBIOS(disks [][]byte) {
 	c.Write16(uint16(DPH3+len(dph)+2), Alloc3)
 
 	copy(c.Memory[SecTrans:], []byte{
-		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+		1, 7, 13, 19, 25, 5, 11, 17, 23, 3, 9, 15, 21, 2, 8, 14, 20, 26, 6, 12, 18, 24, 4, 10, 16, 22,
 	})
 
 	copy(c.Memory[DPB:], []byte{
@@ -156,7 +167,7 @@ func (c *CPU) initBIOS(disks [][]byte) {
 		63, 0, // directory max ??
 		192,   // alloc 0
 		0,     // alloc 1
-		16, 0, // check size
+		15, 0, // check size
 		2, 0, // track offset ??
 	})
 }
@@ -166,7 +177,9 @@ func instrBIOS(op uint8, c *CPU) uint64 {
 	case BOOT:
 		panic("BOOT unimplemented")
 	case WBOOT:
-		panic("WBOOT unimplemented")
+		c.initBIOS(nil, nil)
+		c.PC = CPM
+		return 100
 	case CONST:
 		if c.ioHasChar() {
 			c.Registers[A] = 0xFF
@@ -201,17 +214,25 @@ func instrBIOS(op uint8, c *CPU) uint64 {
 		c.bios.dmaAddress = c.GetR16(BC)
 	case READ:
 		offset := 128 * int(26*c.bios.currentTrack+c.bios.currentSector)
-		//fmt.Printf("READ %d, %d, %d => %d\r\n", c.bios.currentDisk, c.bios.currentTrack, c.bios.currentSector, offset)
 		for i := 0; i < DMA_SIZE; i++ {
-			c.Memory[int(c.bios.dmaAddress)+i] = c.bios.disks[c.bios.currentDisk][offset+i]
+			c.Memory[int(c.bios.dmaAddress)+i] = c.bios.disks[c.bios.currentDisk].Data[offset+i]
 		}
 		c.Registers[A] = 0
 	case WRITE:
-		panic("WRITE unimplemented")
+		if c.bios.disks[c.bios.currentDisk].ReadOnly {
+			c.Registers[A] = 2
+		} else {
+			offset := 128 * int(26*c.bios.currentTrack+c.bios.currentSector)
+			for i := 0; i < DMA_SIZE; i++ {
+				c.bios.disks[c.bios.currentDisk].Data[offset+i] = c.Memory[int(c.bios.dmaAddress)+i]
+			}
+			c.Registers[A] = 0
+		}
 	case LISTST:
 		panic("LISTST unimplemented")
 	case SECTRAN:
-		c.SetR16(HL, c.GetR16(BC))
+		addr := c.GetR16(DE)
+		c.SetR16(HL, uint16(c.Memory[addr+c.GetR16(BC)])-1)
 	default:
 		panic(fmt.Sprintf(
 			"unimplemented BIOS call to %x, expected %x, %x, %x, ..., %x, %x, %x",

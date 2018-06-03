@@ -3,6 +3,9 @@ package i8080
 import (
 	"fmt"
 	"io"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -41,13 +44,13 @@ type CPU struct {
 }
 
 // New creates a new emulated Intel 8080 CPU
-func New(conin io.Reader, conout io.Writer, disks [][]byte) (c *CPU) {
+func New(conin io.Reader, conout io.Writer, cpmImage []byte, disks []Disk) (c *CPU) {
 	c = &CPU{
 		Flags:     FlagBit1,
 		ClockTime: Speed2Mhz,
 	}
 
-	c.initBIOS(disks)
+	c.initBIOS(cpmImage, disks)
 	c.initIO(conin, conout)
 
 	return
@@ -63,6 +66,15 @@ const tickBudget = 10 * time.Millisecond
 
 // Run runs the CPU and returns how many CPU cycles were executed before a halt
 func (c *CPU) Run() (cycles uint64) {
+	debug := false
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGUSR1)
+	go func() {
+		for range sigChan {
+			debug = !debug
+		}
+	}()
+
 	ticker := time.NewTicker(tickBudget)
 
 	defer func() {
@@ -75,15 +87,29 @@ func (c *CPU) Run() (cycles uint64) {
 
 	var timeUsed time.Duration
 
+	nops := 0
+
 	for {
 		<-ticker.C // wait for next tick
 
 		for timeUsed < tickBudget {
+			if debug {
+				fmt.Printf("%8d %s\r\n", cycles, c.Debug())
+			}
 			op := c.Memory[c.PC]
+			if op == 0x00 {
+				nops++
+			} else {
+				nops = 0
+			}
 			c.PC++
 			cyclesThisOp := ops[op](op, c)
 			cycles += cyclesThisOp
 			timeUsed += time.Duration(cyclesThisOp) * c.ClockTime
+
+			if nops > 10 {
+				panic("nop")
+			}
 		}
 
 		timeUsed -= tickBudget
