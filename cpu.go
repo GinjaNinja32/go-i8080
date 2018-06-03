@@ -57,12 +57,6 @@ func New(conin io.Reader, conout io.Writer, cpmImage []byte, disks []Disk) (c *C
 	return
 }
 
-// Output is called when a string is output
-func (c *CPU) Output(s string) {
-	//c.OutputStr += s
-	fmt.Printf("%s", s)
-}
-
 const tickBudget = 10 * time.Millisecond
 
 // Run runs the CPU and returns how many CPU cycles were executed before a halt
