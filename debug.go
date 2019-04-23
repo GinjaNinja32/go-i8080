@@ -8,7 +8,7 @@ import (
 func (c *CPU) Debug() string {
 	mnem, args := c.disasmPC()
 
-	disasm := fmt.Sprintf("ASM %4x %2x => %-8s%-8s", c.PC, c.Memory[c.PC], mnem, args)
+	disasm := fmt.Sprintf("ASM %04x %02x => %-8s%-8s", c.PC, c.Memory[c.PC], mnem, args)
 
 	regs := fmt.Sprintf("REG BC=%02x %02x DE=%02x %02x HL=%02x %02x A=%02x SP=%04x PC=%04x",
 		c.Registers[B], c.Registers[C], c.Registers[D], c.Registers[E], c.Registers[H], c.Registers[L], c.Registers[A], c.SP, c.PC)
@@ -33,39 +33,65 @@ func (c *CPU) Debug() string {
 // FlagsToString converts a flag register value `ff` to a string describing the state of the flags
 func FlagsToString(ff uint8) string {
 	f := flags(ff)
-	var Z, C, A, P, S string
+	var S, Z, P, C string
+
+	var short string
+
+	if (f & FlagSign) != 0 {
+		S = "M"
+		short += "S"
+	} else {
+		S = "P"
+		short += "_"
+	}
 
 	if (f & FlagZero) != 0 {
 		Z = " Z"
+		short += "Z"
 	} else {
 		Z = "NZ"
+		short += "_"
 	}
 
-	if (f & FlagCarry) != 0 {
-		C = " C"
+	if (f & FlagBit5) != 0 {
+		short += "x"
 	} else {
-		C = "NC"
+		short += "_"
 	}
 
 	if (f & FlagAuxCarry) != 0 {
-		A = " A"
+		short += "A"
 	} else {
-		A = "NA"
+		short += "_"
+	}
+
+	if (f & FlagBit3) != 0 {
+		short += "x"
+	} else {
+		short += "_"
 	}
 
 	if (f & FlagParity) != 0 {
 		P = "PE"
+		short += "P"
 	} else {
 		P = "PO"
+		short += "_"
 	}
 
-	if (f & FlagSign) != 0 {
-		S = "M"
+	if (f & FlagBit1) != 0 {
+		short += "x"
 	} else {
-		S = "P"
+		short += "_"
 	}
 
-	unused := fmt.Sprintf("%08b", f)
+	if (f & FlagCarry) != 0 {
+		C = " C"
+		short += "C"
+	} else {
+		C = "NC"
+		short += "_"
+	}
 
-	return fmt.Sprintf("%s %s %s %s %s (%s)", S, Z, A, P, C, unused)
+	return fmt.Sprintf("%s (%02x; %s %s %s %s)", short, f, S, Z, P, C)
 }
